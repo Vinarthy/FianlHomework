@@ -1,0 +1,20 @@
+[
+    {
+        "ID": "1",
+        "Name": "仙人掌",
+        "Price": 50.0,
+        "RemainingQuantity": -858993460
+    },
+    {
+        "ID": "2",
+        "Name": "wsd",
+        "Price": 4.0,
+        "RemainingQuantity": -858993460
+    },
+    {
+        "ID": "8",
+        "Name": "原神",
+        "Price": 45.0,
+        "RemainingQuantity": -858993460
+    }
+]
