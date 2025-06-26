@@ -16,6 +16,7 @@
 #include<list>
 #include"admin.h"
 #include<json.hpp>
+#include "List_.h"
 using json = nlohmann::json;//使用json
 using namespace std;
 
@@ -112,7 +113,48 @@ void buyBooks(GoodsManager& bookManager, User& realBuyer, json& users) {
     double discountedTotal = realBuyer.calculateTotal(total);
     cout << "用户等级：" << realBuyer.Level << "，原价合计：" << total << " 元，折扣后应付：" << discountedTotal << " 元\n";
 
-    if (realBuyer.tryPayjh(discountedTotal) || realBuyer.tryPaynh(discountedTotal)) {
+    // 添加支付方式选择
+    string paymentMethod;
+    bool paymentSuccess = false;
+
+    while (true) {
+        cout << "请选择支付方式：\n";
+        cout << "1. 建设银行 (余额: " << realBuyer.jianhangCredits << " 元)\n";
+        cout << "2. 农业银行 (余额: " << realBuyer.nonghangCredits << " 元)\n";
+        cout << "3. 取消支付\n";
+
+        cin >> paymentMethod;
+
+        if (paymentMethod == "1") {
+            if (realBuyer.tryPayjh(discountedTotal)) {
+                paymentSuccess = true;
+                cout << "使用建设银行支付成功！\n";
+            }
+            else {
+                cout << "建设银行余额不足！\n";
+            }
+            break;
+        }
+        else if (paymentMethod == "2") {
+            if (realBuyer.tryPaynh(discountedTotal)) {
+                paymentSuccess = true;
+                cout << "使用农业银行支付成功！\n";
+            }
+            else {
+                cout << "农业银行余额不足！\n";
+            }
+            break;
+        }
+        else if (paymentMethod == "3") {
+            cout << "已取消支付。\n";
+            break;
+        }
+        else {
+            cout << "无效选择，请重新输入。\n";
+        }
+    }
+
+    if (paymentSuccess) {
         cout << "支付成功！剩余建行余额：" << realBuyer.jianhangCredits
             << " 元，农行余额：" << realBuyer.nonghangCredits << " 元\n";
 
@@ -126,16 +168,131 @@ void buyBooks(GoodsManager& bookManager, User& realBuyer, json& users) {
         if (out.is_open()) {
             out << setw(4) << users;
         }
-
     }
     else {
-        cout << "支付失败（余额不足），购物车已清空。\n";
+        cout << "支付未完成，购物车已清空。\n";
         realBuyer.Spcar_Book_ID.clear();
         realBuyer.Spcar_Book_Num.clear();
     }
 }
+// main.cpp
+#include "List_.h" // 包含自定义链表头文件
+// ... 其他包含 ...
+
+void createInitialUsers() {
+    // 加载现有用户
+    json users;
+    ifstream inFile(filename);
+    if (inFile.is_open()) {
+        try {
+            inFile >> users;
+        }
+        catch (...) {
+            users = json::object();
+        }
+        inFile.close();
+    }
+    else {
+        users = json::object();
+    }
+
+    cout << "==== 手动创建用户 ====" << endl;
+    cout << "您需要手动输入10个用户的信息" << endl;
+    GoodsManager converter;
+
+    // 使用自定义链表存储用户
+    List_<User> userList;
+
+    // 手动创建10个用户并添加到链表
+    for (int i = 1; i <= 10; i++) {
+        cout << "\n==== 创建第 " << i << " 个用户 ====" << endl;
+
+        string username, password, address, major;
+
+        // 手动输入用户名
+        while (true) {
+            cout << "请输入用户名: ";
+            getline(cin, username);
+
+            // 检查输入是否为空
+            if (username.empty()) {
+                cout << "用户名不能为空，请重新输入" << endl;
+                continue;
+            }
+
+            // 转换为UTF-8
+            string utf8Username = converter.GbkToUtf8(username);
+
+            // 检查用户名是否已存在
+            if (users.contains(utf8Username)) {
+                cout << "用户名已存在，请重新输入" << endl;
+            }
+            else {
+                username = utf8Username;
+                break;
+            }
+        }
+
+        // 手动输入密码
+        cout << "请输入密码: ";
+        getline(cin, password);
+        password = converter.GbkToUtf8(password);
+
+        // 手动输入地址
+        cout << "请输入地址: ";
+        getline(cin, address);
+        address = converter.GbkToUtf8(address);
+
+        // 手动输入专业
+        cout << "请输入专业: ";
+        getline(cin, major);
+        major = converter.GbkToUtf8(major);
+
+        // 手动创建用户对象
+        User newUser(username, password, address, major);
+
+        // 手动添加到链表
+        userList.push_back(newUser);
+
+        // 使用原始输入显示用户名（避免转换问题）
+        cout << "用户 " << i << " (" << username << ") 创建成功！" << endl;
+    }
+
+    // 手动遍历链表
+    List_<User>::Node* current = userList.get_head();
+    while (current != nullptr) {
+        // 手动访问节点数据
+        User& user = current->data;
+
+        // 手动添加到JSON
+        users[user.Name] = user.toJson();
+
+        // 直接输出UTF-8用户名，避免转换问题
+        cout << "已将用户添加到系统: " << user.Name << endl;
+
+        // 手动移动到下一个节点
+        current = current->next;
+    }
+
+    // 保存用户数据
+    ofstream outFile(filename);
+    if (outFile.is_open()) {
+        outFile << setw(4) << users;
+        cout << "\n==== 用户创建完成 ====" << endl;
+        cout << "已成功创建 10 个用户并保存到系统" << endl;
+    }
+    else {
+        cerr << "无法保存用户数据" << endl;
+    }
+}
+
+// ... main() 函数保持不变 ...
 int main() {
     cout << "欢迎进入信息管理系统！" << endl;
+    cout << "下面开始创建初始用户！~" << endl;
+
+    // 创建初始用户
+    createInitialUsers();
     LogOrSign();
     if (Success_Log == true) {
         GoodsManager bookManager;
