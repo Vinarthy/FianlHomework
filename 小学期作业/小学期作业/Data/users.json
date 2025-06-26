@@ -1,0 +1,26 @@
+{
+    "煮玉米": {
+        "Address": "酒泉",
+        "Level": 1,
+        "Major": "",
+        "Name": "煮玉米",
+        "Password": "123456",
+        "Spcar_Book_ID": [],
+        "Spcar_Book_Num": [],
+        "jianhangCredits": 1000.0,
+        "nonghangCredits": 1000.0,
+        "pay": 0.0
+    },
+    "老李": {
+        "Address": "四川",
+        "Level": 5,
+        "Major": "",
+        "Name": "老李",
+        "Password": "123456",
+        "Spcar_Book_ID": [],
+        "Spcar_Book_Num": [],
+        "jianhangCredits": 0.0,
+        "nonghangCredits": 548.77,
+        "pay": 155.23
+    }
+}
